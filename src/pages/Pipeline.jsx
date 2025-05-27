@@ -736,6 +736,7 @@ const Pipeline = () => {
                       </p>
                     </div>
                   </div>
+                  </div>
 
 
                 <div className="flex space-x-3 pt-4">
@@ -752,7 +753,6 @@ const Pipeline = () => {
                 </div>
               </form>
 
-              </form>
             </div>
           </motion.div>
         </div>
@@ -1005,19 +1005,6 @@ const Pipeline = () => {
 
 
 
-                <div className="flex space-x-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowEditModal(false)}
-                    className="btn-secondary flex-1"
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn-primary flex-1">
-                    Update Deal
-                  </button>
-                </div>
-              </form>
             </div>
           </motion.div>
         </div>
