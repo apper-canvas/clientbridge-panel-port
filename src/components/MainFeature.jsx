@@ -8,6 +8,11 @@ const MainFeature = () => {
   const [customers, setCustomers] = useState([])
   const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [editingCustomer, setEditingCustomer] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deletingCustomerId, setDeletingCustomerId] = useState(null)
+
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [view, setView] = useState('list') // 'list', 'pipeline', 'analytics'
@@ -317,6 +322,86 @@ const MainFeature = () => {
       customer.id === customerId ? { ...customer, status: newStatus, lastContact: new Date() } : customer
     ))
     toast.success('Customer status updated!')
+
+  const handleEdit = (customer) => {
+    setEditingCustomer(customer)
+    setFormData({
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone || '',
+      company: customer.company,
+      status: customer.status,
+      notes: customer.notes || '',
+      companySize: customer.companySize || 'small',
+      budget: customer.budget || 'unknown',
+      timeline: customer.timeline || 'long',
+      industry: customer.industry || 'technology'
+    })
+    setShowEditForm(true)
+  }
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault()
+    
+    if (!formData.name || !formData.email || !formData.company) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    setCustomers(prev => prev.map(customer => 
+      customer.id === editingCustomer.id 
+        ? {
+            ...customer,
+            ...formData,
+            lastContact: new Date()
+          }
+        : customer
+    ))
+    
+    setFormData({ 
+      name: '', 
+      email: '', 
+      phone: '', 
+      company: '', 
+      status: 'lead', 
+      notes: '',
+      companySize: 'small',
+      budget: 'unknown',
+      timeline: 'long',
+      industry: 'technology'
+    })
+    setShowEditForm(false)
+    setEditingCustomer(null)
+    
+    // Update selected customer if it was the one being edited
+    if (selectedCustomer?.id === editingCustomer.id) {
+      setSelectedCustomer(prev => ({ ...prev, ...formData, lastContact: new Date() }))
+    }
+    
+    toast.success('Customer updated successfully!')
+  }
+
+  const handleDelete = (customerId) => {
+    setDeletingCustomerId(customerId)
+    setShowDeleteConfirm(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    const customerToDelete = customers.find(c => c.id === deletingCustomerId)
+    
+    setCustomers(prev => prev.filter(customer => customer.id !== deletingCustomerId))
+    
+    // Clear selected customer if it was the one being deleted
+    if (selectedCustomer?.id === deletingCustomerId) {
+      setSelectedCustomer(null)
+    }
+    
+    setShowDeleteConfirm(false)
+    setDeletingCustomerId(null)
+    
+    toast.success(`${customerToDelete?.name} has been deleted successfully`)
+  }
+
   }
 
   const getScoreColor = (score) => {
@@ -552,6 +637,29 @@ const MainFeature = () => {
                               title="Update lead scoring"
                             >
                               🎯
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEdit(customer)
+                              }}
+                              className="p-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors text-xs"
+                              title="Edit customer"
+                            >
+                              ✏️
+                            </button>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDelete(customer.id)
+                              }}
+                              className="p-1 rounded bg-red-100 text-red-600 hover:bg-red-200 transition-colors text-xs"
+                              title="Delete customer"
+                            >
+                              🗑️
+                            </button>
+
                             </button>
                           </div>
                         </div>
@@ -1031,6 +1139,311 @@ const MainFeature = () => {
               </div>
             </motion.div>
           </motion.div>
+
+      {/* Edit Customer Modal */}
+      <AnimatePresence>
+        {showEditForm && editingCustomer && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowEditForm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white dark:bg-surface-800 rounded-2xl shadow-card max-w-md w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-surface-900 dark:text-surface-100">
+                    Edit Customer
+                  </h3>
+                  <button
+                    onClick={() => setShowEditForm(false)}
+                    className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors duration-200"
+                  >
+                    <ApperIcon name="X" className="w-5 h-5 text-surface-500" />
+                  </button>
+                </div>
+                
+                <form onSubmit={handleEditSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="input-field"
+                      placeholder="Enter customer name"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="input-field"
+                      placeholder="Enter email address"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="input-field"
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Company *
+                    </label>
+                    <input
+                      type="text"
+                      name="company"
+                      value={formData.company}
+                      onChange={handleInputChange}
+                      className="input-field"
+                      placeholder="Enter company name"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Status
+                    </label>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="lead">Lead</option>
+                      <option value="prospect">Prospect</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Company Size
+                    </label>
+                    <select
+                      name="companySize"
+                      value={formData.companySize}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="startup">Startup (1-10)</option>
+                      <option value="small">Small (11-50)</option>
+                      <option value="medium">Medium (51-200)</option>
+                      <option value="large">Large (201-1000)</option>
+                      <option value="enterprise">Enterprise (1000+)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Budget Range
+                    </label>
+                    <select
+                      name="budget"
+                      value={formData.budget}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="unknown">Unknown</option>
+                      <option value="low">Low ($1K-$10K)</option>
+                      <option value="medium">Medium ($10K-$50K)</option>
+                      <option value="high">High ($50K+)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Timeline
+                    </label>
+                    <select
+                      name="timeline"
+                      value={formData.timeline}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="immediate">Immediate (This month)</option>
+                      <option value="short">Short (1-3 months)</option>
+                      <option value="medium">Medium (3-6 months)</option>
+                      <option value="long">Long (6+ months)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Industry
+                    </label>
+                    <select
+                      name="industry"
+                      value={formData.industry}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="technology">Technology</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="finance">Finance</option>
+                      <option value="manufacturing">Manufacturing</option>
+                      <option value="retail">Retail</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Notes
+                    </label>
+                    <textarea
+                      name="notes"
+                      value={formData.notes}
+                      onChange={handleInputChange}
+                      className="input-field min-h-[80px] resize-vertical"
+                      placeholder="Add notes about this customer..."
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="flex space-x-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditForm(false)}
+                      className="btn-secondary flex-1"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn-primary flex-1"
+                    >
+                      Update Customer
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white dark:bg-surface-800 rounded-2xl shadow-card max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-surface-900 dark:text-surface-100">
+                    Delete Customer
+                  </h3>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors duration-200"
+                  >
+                    <ApperIcon name="X" className="w-5 h-5 text-surface-500" />
+                  </button>
+                </div>
+                
+                <div className="mb-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                      <ApperIcon name="AlertTriangle" className="w-6 h-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-surface-900 dark:text-surface-100">
+                        Are you sure?
+                      </h4>
+                      <p className="text-sm text-surface-600 dark:text-surface-400">
+                        This action cannot be undone.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {(() => {
+                    const customerToDelete = customers.find(c => c.id === deletingCustomerId)
+                    return customerToDelete ? (
+                      <div className="bg-surface-50 dark:bg-surface-700 rounded-lg p-4">
+                        <p className="text-sm text-surface-700 dark:text-surface-300 mb-2">
+                          You are about to permanently delete:
+                        </p>
+                        <div className="font-medium text-surface-900 dark:text-surface-100">
+                          <div>{customerToDelete.name}</div>
+                          <div className="text-sm text-surface-600 dark:text-surface-400">
+                            {customerToDelete.company}
+                          </div>
+                        </div>
+                        {customerToDelete.deals?.length > 0 && (
+                          <div className="mt-2 text-sm text-orange-600 dark:text-orange-400">
+                            ⚠️ This customer has {customerToDelete.deals.length} active deal(s)
+                          </div>
+                        )}
+                      </div>
+                    ) : null
+                  })()} 
+                </div>
+                
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="btn-secondary flex-1"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-card"
+                  >
+                    Delete Customer
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
         )}
       </AnimatePresence>
 
