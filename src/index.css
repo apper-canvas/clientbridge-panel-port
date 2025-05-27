@@ -43,6 +43,35 @@
 
   .kanban-card {
     @apply bg-white rounded-lg shadow-card p-4 mb-3 border border-surface-100 cursor-pointer hover:shadow-soft transition-all duration-200;
+
+  .score-badge {
+    @apply inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold border;
+  }
+  
+  .score-hot {
+    @apply bg-red-50 text-red-700 border-red-200;
+  }
+  
+  .score-warm {
+    @apply bg-orange-50 text-orange-700 border-orange-200;
+  }
+  
+  .score-lukewarm {
+    @apply bg-yellow-50 text-yellow-700 border-yellow-200;
+  }
+  
+  .score-cold {
+    @apply bg-blue-50 text-blue-700 border-blue-200;
+  }
+  
+  .scoring-gauge {
+    @apply relative w-full h-2 bg-surface-200 rounded-full overflow-hidden;
+  }
+  
+  .scoring-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
   }
 }
 

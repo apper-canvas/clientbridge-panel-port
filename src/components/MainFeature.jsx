@@ -12,17 +12,163 @@ const MainFeature = () => {
   const [filterStatus, setFilterStatus] = useState('all')
   const [view, setView] = useState('list') // 'list', 'pipeline', 'analytics'
   
-  // Form state
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     company: '',
     status: 'lead',
-    notes: ''
+    notes: '',
+    companySize: 'small',
+    budget: 'unknown',
+    timeline: 'long',
+    industry: 'technology'
   })
+  
+  // Lead scoring state
+  const [showScoring, setShowScoring] = useState(false)
+  const [scoringCustomerId, setScoringCustomerId] = useState(null)
+
 
   // Sample data initialization
+  // Lead scoring algorithm
+  const calculateLeadScore = (customer) => {
+    let score = 0
+    
+    // Company size scoring (0-25 points)
+    const companySizeScores = {
+      'startup': 10,
+      'small': 15,
+      'medium': 20,
+      'large': 25,
+      'enterprise': 25
+    }
+    score += companySizeScores[customer.companySize] || 0
+    
+    // Budget scoring (0-25 points)
+    const budgetScores = {
+      'low': 5,
+      'medium': 15,
+      'high': 25,
+      'unknown': 10
+    }
+    score += budgetScores[customer.budget] || 0
+    
+    // Timeline scoring (0-20 points)
+    const timelineScores = {
+      'immediate': 20,
+      'short': 15,
+      'medium': 10,
+      'long': 5
+    }
+    score += timelineScores[customer.timeline] || 0
+    
+    // Industry fit scoring (0-15 points)
+    const industryScores = {
+      'technology': 15,
+      'healthcare': 12,
+      'finance': 10,
+      'manufacturing': 8,
+      'retail': 6,
+      'other': 3
+    }
+    score += industryScores[customer.industry] || 0
+    
+    // Engagement scoring (0-15 points)
+    const daysSinceContact = Math.floor((new Date() - customer.lastContact) / (1000 * 60 * 60 * 24))
+    if (daysSinceContact <= 1) score += 15
+    else if (daysSinceContact <= 7) score += 10
+    else if (daysSinceContact <= 30) score += 5
+    
+    // Deal value scoring (0-10 points)
+    const totalDealValue = customer.deals?.reduce((sum, deal) => sum + deal.value, 0) || 0
+    if (totalDealValue >= 50000) score += 10
+    else if (totalDealValue >= 20000) score += 7
+    else if (totalDealValue >= 5000) score += 4
+    
+    return Math.min(score, 100) // Cap at 100
+  }
+  
+  // Get lead temperature based on score
+  const getLeadTemperature = (score) => {
+    if (score >= 80) return 'hot'
+    if (score >= 60) return 'warm'
+    if (score >= 40) return 'lukewarm'
+    return 'cold'
+  }
+  
+  // Automated workflow based on score
+  const triggerAutomatedWorkflow = (customer, score) => {
+    const temperature = getLeadTemperature(score)
+    
+    if (temperature === 'hot' && customer.status === 'lead') {
+      // Auto-promote to prospect and create high-priority task
+      setCustomers(prev => prev.map(c => 
+        c.id === customer.id 
+          ? {
+              ...c,
+              status: 'prospect',
+              tasks: [
+                ...c.tasks,
+                {
+                  id: `task_${Date.now()}`,
+                  title: 'Immediate follow-up required - Hot lead!',
+                  dueDate: new Date(),
+                  priority: 'high',
+                  completed: false,
+                  automated: true
+                }
+              ]
+            }
+          : c
+      ))
+      toast.success(`🔥 ${customer.name} promoted to hot prospect with auto-task created!`)
+    } else if (temperature === 'warm') {
+      // Create medium priority task for warm leads
+      setCustomers(prev => prev.map(c => 
+        c.id === customer.id 
+          ? {
+              ...c,
+              tasks: [
+                ...c.tasks.filter(t => !t.automated),
+                {
+                  id: `task_${Date.now()}`,
+                  title: 'Follow up with warm lead',
+                  dueDate: addDays(new Date(), 2),
+                  priority: 'medium',
+                  completed: false,
+                  automated: true
+                }
+              ]
+            }
+          : c
+      ))
+      toast.info(`🌡️ ${customer.name} marked as warm lead with follow-up scheduled`)
+    } else if (temperature === 'cold') {
+      // Create nurturing task for cold leads
+      setCustomers(prev => prev.map(c => 
+        c.id === customer.id 
+          ? {
+              ...c,
+              tasks: [
+                ...c.tasks.filter(t => !t.automated),
+                {
+                  id: `task_${Date.now()}`,
+                  title: 'Add to nurturing campaign',
+                  dueDate: addDays(new Date(), 7),
+                  priority: 'low',
+                  completed: false,
+                  automated: true
+                }
+              ]
+            }
+          : c
+      ))
+      toast.info(`❄️ ${customer.name} added to cold lead nurturing workflow`)
+    }
+  }
+
+  // Sample data initialization with scoring data
   useEffect(() => {
     const sampleCustomers = [
       {
@@ -35,6 +181,10 @@ const MainFeature = () => {
         createdAt: new Date('2024-01-15'),
         lastContact: new Date('2024-01-20'),
         notes: 'Interested in enterprise package. Follow up next week.',
+        companySize: 'large',
+        budget: 'high',
+        timeline: 'short',
+        industry: 'technology',
         deals: [
           { id: 'd1', title: 'Enterprise License', value: 25000, stage: 'proposal', probability: 75 }
         ],
@@ -52,6 +202,10 @@ const MainFeature = () => {
         createdAt: new Date('2024-01-18'),
         lastContact: new Date('2024-01-18'),
         notes: 'Cold lead from website form. Initial interest in consulting services.',
+        companySize: 'medium',
+        budget: 'medium',
+        timeline: 'medium',
+        industry: 'technology',
         deals: [],
         tasks: [
           { id: 't2', title: 'Initial qualification call', dueDate: addDays(new Date(), 1), priority: 'medium', completed: false }
@@ -67,6 +221,10 @@ const MainFeature = () => {
         createdAt: new Date('2024-01-10'),
         lastContact: new Date('2024-01-22'),
         notes: 'Met at tech conference. Very interested in our startup package.',
+        companySize: 'startup',
+        budget: 'low',
+        timeline: 'immediate',
+        industry: 'technology',
         deals: [
           { id: 'd2', title: 'Startup Package', value: 5000, stage: 'negotiation', probability: 60 }
         ],
@@ -75,6 +233,7 @@ const MainFeature = () => {
     ]
     setCustomers(sampleCustomers)
   }, [])
+
 
   // Filter customers based on search and status
   const filteredCustomers = customers.filter(customer => {
@@ -91,6 +250,27 @@ const MainFeature = () => {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleScoreUpdate = (customerId, newScoreData) => {
+    setCustomers(prev => prev.map(customer => {
+      if (customer.id === customerId) {
+        const updatedCustomer = { ...customer, ...newScoreData, lastContact: new Date() }
+        const score = calculateLeadScore(updatedCustomer)
+        
+        // Trigger automated workflow
+        setTimeout(() => triggerAutomatedWorkflow(updatedCustomer, score), 500)
+        
+        return updatedCustomer
+      }
+      return customer
+    }))
+    setScoringCustomerId(null)
+    setShowScoring(false)
+    toast.success('Lead scoring updated and workflow triggered!')
+  }
+
+
+
+  const handleSubmit = (e) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     
@@ -109,10 +289,27 @@ const MainFeature = () => {
     }
 
     setCustomers(prev => [newCustomer, ...prev])
-    setFormData({ name: '', email: '', phone: '', company: '', status: 'lead', notes: '' })
+    
+    // Calculate initial score and trigger workflow
+    const score = calculateLeadScore(newCustomer)
+    setTimeout(() => triggerAutomatedWorkflow(newCustomer, score), 1000)
+    
+    setFormData({ 
+      name: '', 
+      email: '', 
+      phone: '', 
+      company: '', 
+      status: 'lead', 
+      notes: '',
+      companySize: 'small',
+      budget: 'unknown',
+      timeline: 'long',
+      industry: 'technology'
+    })
     setShowAddForm(false)
-    toast.success('Customer added successfully!')
+    toast.success('Customer added successfully with automated scoring!')
   }
+
 
   const handleStatusChange = (customerId, newStatus) => {
     setCustomers(prev => prev.map(customer => 
@@ -120,6 +317,22 @@ const MainFeature = () => {
     ))
     toast.success('Customer status updated!')
   }
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return 'text-red-600 bg-red-50 border-red-200' // Hot
+    if (score >= 60) return 'text-orange-600 bg-orange-50 border-orange-200' // Warm
+    if (score >= 40) return 'text-yellow-600 bg-yellow-50 border-yellow-200' // Lukewarm
+    return 'text-blue-600 bg-blue-50 border-blue-200' // Cold
+  }
+
+  const getTemperatureIcon = (score) => {
+    const temp = getLeadTemperature(score)
+    if (temp === 'hot') return '🔥'
+    if (temp === 'warm') return '🌡️'
+    if (temp === 'lukewarm') return '🌤️'
+    return '❄️'
+  }
+
 
   const getStatusColor = (status) => {
     const colors = {
@@ -194,6 +407,17 @@ const MainFeature = () => {
               <span className="hidden sm:inline">Analytics</span>
             </button>
           </div>
+          
+          <button
+            onClick={() => {
+              window.location.href = '/lead-scoring'
+            }}
+            className="flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-card"
+          >
+            <span>🎯</span>
+            <span className="hidden sm:inline">Lead Scoring</span>
+          </button>
+
           
           <button
             onClick={() => setShowAddForm(true)}
@@ -273,14 +497,18 @@ const MainFeature = () => {
                           selectedCustomer?.id === customer.id
                             ? 'border-primary bg-primary bg-opacity-5 shadow-glow'
                             : 'border-surface-200 dark:border-surface-700 hover:border-primary hover:shadow-card bg-white dark:bg-surface-800'
-                        }`}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-card">
-                              <span className="text-white font-semibold text-sm">
-                                {customer.name.charAt(0)}
-                              </span>
+                            <div className="relative">
+                              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-card">
+                                <span className="text-white font-semibold text-sm">
+                                  {customer.name.charAt(0)}
+                                </span>
+                              </div>
+                              <div className="absolute -top-1 -right-1 text-xs">
+                                {getTemperatureIcon(calculateLeadScore(customer))}
+                              </div>
                             </div>
                             <div>
                               <h4 className="font-semibold text-surface-900 dark:text-surface-100">
@@ -293,6 +521,11 @@ const MainFeature = () => {
                           </div>
                           
                           <div className="flex items-center space-x-2">
+                            {/* Lead Score Display */}
+                            <div className={`px-2 py-1 rounded-lg border text-xs font-semibold ${getScoreColor(calculateLeadScore(customer))}`}>
+                              {calculateLeadScore(customer)}
+                            </div>
+                            
                             <select
                               value={customer.status}
                               onChange={(e) => {
@@ -307,10 +540,22 @@ const MainFeature = () => {
                               <option value="active">Active</option>
                               <option value="inactive">Inactive</option>
                             </select>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setScoringCustomerId(customer.id)
+                                setShowScoring(true)
+                              }}
+                              className="p-1 rounded bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors text-xs"
+                              title="Update lead scoring"
+                            >
+                              🎯
+                            </button>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-3">
                           <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
                             <ApperIcon name="Mail" className="w-4 h-4" />
                             <span className="truncate">{customer.email}</span>
@@ -321,19 +566,26 @@ const MainFeature = () => {
                           </div>
                         </div>
                         
-                        {customer.deals.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-surface-100 dark:border-surface-700">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-surface-600 dark:text-surface-400">
-                                Active deals: {customer.deals.length}
-                              </span>
-                              <span className="font-semibold text-primary">
-                                ${customer.deals.reduce((sum, deal) => sum + deal.value, 0).toLocaleString()}
-                              </span>
-                            </div>
+                        {/* Lead Score Details */}
+                        <div className="mb-3 p-2 bg-surface-50 dark:bg-surface-700 rounded-lg">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="text-surface-600 dark:text-surface-400">Lead Temperature:</span>
+                            <span className={`font-semibold ${getScoreColor(calculateLeadScore(customer))}`}>
+                              {getLeadTemperature(calculateLeadScore(customer)).toUpperCase()}
+                            </span>
                           </div>
-                        )}
-                      </motion.div>
+                          <div className="w-full bg-surface-200 dark:bg-surface-600 rounded-full h-1.5">
+                            <div 
+                              className={`h-1.5 rounded-full transition-all duration-500 ${
+                                calculateLeadScore(customer) >= 80 ? 'bg-red-500' :
+                                calculateLeadScore(customer) >= 60 ? 'bg-orange-500' :
+                                calculateLeadScore(customer) >= 40 ? 'bg-yellow-500' : 'bg-blue-500'
+                              }`}
+                              style={{ width: `${calculateLeadScore(customer)}%` }}
+                            />
+                          </div>
+                        </div>
+
                     ))}
                   </AnimatePresence>
                   
@@ -684,21 +936,77 @@ const MainFeature = () => {
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
                     </select>
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Company Size
+                    </label>
+                    <select
+                      name="companySize"
+                      value={formData.companySize}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="startup">Startup (1-10)</option>
+                      <option value="small">Small (11-50)</option>
+                      <option value="medium">Medium (51-200)</option>
+                      <option value="large">Large (201-1000)</option>
+                      <option value="enterprise">Enterprise (1000+)</option>
+                    </select>
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                      Notes
+                      Budget Range
                     </label>
-                    <textarea
-                      name="notes"
-                      value={formData.notes}
+                    <select
+                      name="budget"
+                      value={formData.budget}
                       onChange={handleInputChange}
-                      className="input-field resize-none"
-                      rows="3"
-                      placeholder="Add any additional notes..."
-                    />
+                      className="input-field"
+                    >
+                      <option value="unknown">Unknown</option>
+                      <option value="low">Low ($1K-$10K)</option>
+                      <option value="medium">Medium ($10K-$50K)</option>
+                      <option value="high">High ($50K+)</option>
+                    </select>
                   </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Timeline
+                    </label>
+                    <select
+                      name="timeline"
+                      value={formData.timeline}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="immediate">Immediate (This month)</option>
+                      <option value="short">Short (1-3 months)</option>
+                      <option value="medium">Medium (3-6 months)</option>
+                      <option value="long">Long (6+ months)</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Industry
+                    </label>
+                    <select
+                      name="industry"
+                      value={formData.industry}
+                      onChange={handleInputChange}
+                      className="input-field"
+                    >
+                      <option value="technology">Technology</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="finance">Finance</option>
+                      <option value="manufacturing">Manufacturing</option>
+                      <option value="retail">Retail</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
                   
                   <div className="flex space-x-3 pt-4">
                     <button
@@ -721,6 +1029,174 @@ const MainFeature = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Lead Scoring Modal */}
+      <AnimatePresence>
+        {showScoring && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowScoring(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white dark:bg-surface-800 rounded-2xl shadow-card max-w-md w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-surface-900 dark:text-surface-100">
+                    🎯 Update Lead Scoring
+                  </h3>
+                  <button
+                    onClick={() => setShowScoring(false)}
+                    className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors duration-200"
+                  >
+                    <ApperIcon name="X" className="w-5 h-5 text-surface-500" />
+                  </button>
+                </div>
+                
+                {scoringCustomerId && (() => {
+                  const customer = customers.find(c => c.id === scoringCustomerId)
+                  if (!customer) return null
+                  
+                  const currentScore = calculateLeadScore(customer)
+                  const temperature = getLeadTemperature(currentScore)
+                  
+                  return (
+                    <form 
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        const formData = new FormData(e.target)
+                        const scoreData = {
+                          companySize: formData.get('companySize'),
+                          budget: formData.get('budget'),
+                          timeline: formData.get('timeline'),
+                          industry: formData.get('industry')
+                        }
+                        handleScoreUpdate(scoringCustomerId, scoreData)
+                      }} 
+                      className="space-y-4"
+                    >
+                      <div className="text-center mb-6">
+                        <h4 className="font-semibold text-surface-900 dark:text-surface-100 mb-2">
+                          {customer.name}
+                        </h4>
+                        <div className="flex items-center justify-center space-x-4">
+                          <div className={`px-3 py-1 rounded-lg border ${getScoreColor(currentScore)}`}>
+                            Score: {currentScore}/100
+                          </div>
+                          <div className="text-lg">
+                            {getTemperatureIcon(currentScore)} {temperature.toUpperCase()}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                          Company Size
+                        </label>
+                        <select
+                          name="companySize"
+                          defaultValue={customer.companySize || 'small'}
+                          className="input-field"
+                        >
+                          <option value="startup">Startup (1-10) - 10pts</option>
+                          <option value="small">Small (11-50) - 15pts</option>
+                          <option value="medium">Medium (51-200) - 20pts</option>
+                          <option value="large">Large (201-1000) - 25pts</option>
+                          <option value="enterprise">Enterprise (1000+) - 25pts</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                          Budget Range
+                        </label>
+                        <select
+                          name="budget"
+                          defaultValue={customer.budget || 'unknown'}
+                          className="input-field"
+                        >
+                          <option value="unknown">Unknown - 10pts</option>
+                          <option value="low">Low ($1K-$10K) - 5pts</option>
+                          <option value="medium">Medium ($10K-$50K) - 15pts</option>
+                          <option value="high">High ($50K+) - 25pts</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                          Timeline
+                        </label>
+                        <select
+                          name="timeline"
+                          defaultValue={customer.timeline || 'long'}
+                          className="input-field"
+                        >
+                          <option value="immediate">Immediate - 20pts</option>
+                          <option value="short">Short (1-3 months) - 15pts</option>
+                          <option value="medium">Medium (3-6 months) - 10pts</option>
+                          <option value="long">Long (6+ months) - 5pts</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                          Industry Fit
+                        </label>
+                        <select
+                          name="industry"
+                          defaultValue={customer.industry || 'technology'}
+                          className="input-field"
+                        >
+                          <option value="technology">Technology - 15pts</option>
+                          <option value="healthcare">Healthcare - 12pts</option>
+                          <option value="finance">Finance - 10pts</option>
+                          <option value="manufacturing">Manufacturing - 8pts</option>
+                          <option value="retail">Retail - 6pts</option>
+                          <option value="other">Other - 3pts</option>
+                        </select>
+                      </div>
+                      
+                      <div className="bg-surface-50 dark:bg-surface-700 p-3 rounded-lg">
+                        <h5 className="font-medium text-surface-900 dark:text-surface-100 mb-2">Automatic Scoring Factors:</h5>
+                        <div className="text-sm text-surface-600 dark:text-surface-400 space-y-1">
+                          <div>• Recent engagement: +15pts (last 24h), +10pts (last week), +5pts (last month)</div>
+                          <div>• Deal value: +10pts ($50K+), +7pts ($20K+), +4pts ($5K+)</div>
+                          <div>• Workflow actions will be triggered automatically based on final score</div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex space-x-3 pt-4">
+                        <button
+                          type="button"
+                          onClick={() => setShowScoring(false)}
+                          className="btn-secondary flex-1"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="btn-primary flex-1"
+                        >
+                          Update Score
+                        </button>
+                      </div>
+                    </form>
+                  )
+                })()}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   )
 }
