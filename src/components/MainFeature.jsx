@@ -586,8 +586,9 @@ const MainFeature = () => {
                           </div>
                         </div>
                       </motion.div>
-
+                    ))}
                   </AnimatePresence>
+
                   
                   {filteredCustomers.length === 0 && (
                     <div className="text-center py-12">
