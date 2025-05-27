@@ -736,9 +736,10 @@ const Pipeline = () => {
                       </p>
                     </div>
                   </div>
-                </div>
+                </form>
 
                 </div>
+
 
                 <div className="flex space-x-3 pt-4">
                   <button
@@ -985,9 +986,10 @@ const Pipeline = () => {
                       )}
                     </div>
                   </div>
-                </div>
+                </form>
 
                 </div>
+
 
                 <div className="flex space-x-3 pt-4">
                   <button
