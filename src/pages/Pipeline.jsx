@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { format } from 'date-fns'
+
 import { toast } from 'react-toastify'
 import ApperIcon from '../components/ApperIcon'
 
@@ -28,9 +30,9 @@ const Pipeline = () => {
     contact: '',
     email: '',
     phone: '',
-    attachments: []
-
+    attachments: [],
     notes: ''
+
   })
 
   const [dragOver, setDragOver] = useState(false)
@@ -38,8 +40,6 @@ const Pipeline = () => {
 
 
   // Sample data initialization
-  useEffect(() => {
-  useEffect(() => {
     const sampleDeals = [
       {
         id: 1,
@@ -178,19 +178,16 @@ const Pipeline = () => {
     }
 
     const deal = {
-      attachments: [],
-
       id: deals.length + 1,
       ...newDeal,
       value: parseFloat(newDeal.value) || 0,
       createdAt: new Date(),
-      updatedAt: new Date()
-      attachments: [],
-
+      updatedAt: new Date(),
+      attachments: []
     }
 
     setDeals(prev => [...prev, deal])
-      attachments: [],
+
 
     setNewDeal({
       title: '',
@@ -200,10 +197,10 @@ const Pipeline = () => {
       contact: '',
       email: '',
       phone: '',
-      notes: ''
-      attachments: [],
-
+      notes: '',
+      attachments: []
     })
+
     setShowAddModal(false)
     toast.success('Deal added successfully')
   }
@@ -245,8 +242,8 @@ const Pipeline = () => {
       email: '',
       phone: '',
       attachments: [],
-
       notes: ''
+
     })
     toast.success('Deal updated successfully')
   }
@@ -257,6 +254,7 @@ const Pipeline = () => {
       setDeals(prev => prev.filter(deal => deal.id !== dealId))
       toast.success('Deal deleted successfully')
     }
+  }
 
   // File upload handlers for deals
   const handleFileUpload = async (dealId, files) => {
@@ -363,8 +361,6 @@ const Pipeline = () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
   }
 
   // Calculate stage totals
