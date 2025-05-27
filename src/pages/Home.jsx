@@ -85,10 +85,14 @@ const Home = () => {
               <span className="hidden sm:inline">Pipeline</span>
             </button>
 
-            <button className="flex items-center space-x-2 px-4 py-2 text-surface-600 dark:text-surface-400 hover:text-primary hover:bg-surface-50 dark:hover:bg-surface-700 rounded-lg transition-all duration-200 whitespace-nowrap">
+            <button 
+              onClick={() => navigate('/tasks')}
+              className="flex items-center space-x-2 px-4 py-2 text-surface-600 dark:text-surface-400 hover:text-primary hover:bg-surface-50 dark:hover:bg-surface-700 rounded-lg transition-all duration-200 whitespace-nowrap"
+            >
               <ApperIcon name="Calendar" className="w-4 h-4" />
               <span className="hidden sm:inline">Tasks</span>
             </button>
+
             <button className="flex items-center space-x-2 px-4 py-2 text-surface-600 dark:text-surface-400 hover:text-primary hover:bg-surface-50 dark:hover:bg-surface-700 rounded-lg transition-all duration-200 whitespace-nowrap">
               <ApperIcon name="BarChart3" className="w-4 h-4" />
               <span className="hidden sm:inline">Analytics</span>

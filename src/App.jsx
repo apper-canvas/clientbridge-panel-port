@@ -3,6 +3,8 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Home from './pages/Home'
 import LeadScoring from './pages/LeadScoring'
+import Tasks from './pages/Tasks'
+
 import Pipeline from './pages/Pipeline'
 
 
@@ -15,6 +17,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/lead-scoring" element={<LeadScoring />} />
         <Route path="/pipeline" element={<Pipeline />} />
+        <Route path="/tasks" element={<Tasks />} />
+
 
 
         <Route path="*" element={<NotFound />} />
