@@ -270,6 +270,7 @@ const MainFeature = () => {
 
 
 
+  const handleSubmit = (e) => {
     e.preventDefault()
     
     if (!formData.name || !formData.email || !formData.company) {
@@ -307,6 +308,8 @@ const MainFeature = () => {
     setShowAddForm(false)
     toast.success('Customer added successfully with automated scoring!')
   }
+
+
 
 
   const handleStatusChange = (customerId, newStatus) => {
@@ -583,8 +586,7 @@ const MainFeature = () => {
                             />
                           </div>
                         </div>
-                        </div>
-
+                      </motion.div>
 
                     ))}
                   </AnimatePresence>
