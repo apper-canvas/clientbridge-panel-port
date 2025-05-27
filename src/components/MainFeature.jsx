@@ -30,10 +30,10 @@ const MainFeature = () => {
     companySize: 'small',
     budget: 'unknown',
     timeline: 'long',
-    industry: 'technology'
+    industry: 'technology',
     attachments: []
-
   })
+
   
   // Lead scoring state
   const [showScoring, setShowScoring] = useState(false)
@@ -180,7 +180,7 @@ const MainFeature = () => {
 
   // Sample data initialization with scoring data
   useEffect(() => {
-  useEffect(() => {
+
     const sampleCustomers = [
       {
         id: '1',
@@ -274,9 +274,6 @@ const MainFeature = () => {
     setCustomers(sampleCustomers)
   }, [])
 
-    setCustomers(sampleCustomers)
-  }, [])
-
 
   // Filter customers based on search and status
   const filteredCustomers = customers.filter(customer => {
@@ -318,21 +315,18 @@ const MainFeature = () => {
     
     if (!formData.name || !formData.email || !formData.company) {
       toast.error('Please fill in all required fields')
-      return
-    }
-
-      attachments: []
-
+    const newCustomer = {
+      id: Date.now().toString(),
     const newCustomer = {
       id: Date.now().toString(),
       ...formData,
       createdAt: new Date(),
       lastContact: new Date(),
       deals: [],
-      tasks: []
-      attachments: [],
-
+      tasks: [],
+      attachments: []
     }
+
 
     setCustomers(prev => [newCustomer, ...prev])
     
@@ -441,10 +435,10 @@ const MainFeature = () => {
     
     setShowDeleteConfirm(false)
     setDeletingCustomerId(null)
-    
     toast.success(`${customerToDelete?.name} has been deleted successfully`)
+  }
 
-  // File upload handlers
+
   const handleFileUpload = async (customerId, files) => {
     setUploadingFile(true)
     
@@ -569,11 +563,6 @@ const MainFeature = () => {
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  }
-
 
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-red-600 bg-red-50 border-red-200' // Hot
