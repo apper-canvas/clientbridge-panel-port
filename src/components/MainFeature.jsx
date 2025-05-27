@@ -498,101 +498,95 @@ const MainFeature = () => {
                           selectedCustomer?.id === customer.id
                             ? 'border-primary bg-primary bg-opacity-5 shadow-glow'
                             : 'border-surface-200 dark:border-surface-700 hover:border-primary hover:shadow-card bg-white dark:bg-surface-800'
-                        }
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center space-x-3">
-                              <div className="relative">
-                                <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-card">
-                                  <span className="text-white font-semibold text-sm">
-                                    {customer.name.charAt(0)}
-                                  </span>
-                                </div>
-                                <div className="absolute -top-1 -right-1 text-xs">
-                                  {getTemperatureIcon(calculateLeadScore(customer))}
-                                </div>
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="relative">
+                              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-card">
+                                <span className="text-white font-semibold text-sm">
+                                  {customer.name.charAt(0)}
+                                </span>
                               </div>
-                              <div>
-                                <h4 className="font-semibold text-surface-900 dark:text-surface-100">
-                                  {customer.name}
-                                </h4>
-                                <p className="text-sm text-surface-600 dark:text-surface-400">
-                                  {customer.company}
-                                </p>
+                              <div className="absolute -top-1 -right-1 text-xs">
+                                {getTemperatureIcon(calculateLeadScore(customer))}
                               </div>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-surface-900 dark:text-surface-100">
+                                {customer.name}
+                              </h4>
+                              <p className="text-sm text-surface-600 dark:text-surface-400">
+                                {customer.company}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <div className={`px-2 py-1 rounded-lg border text-xs font-semibold ${getScoreColor(calculateLeadScore(customer))}`}>
+                              {calculateLeadScore(customer)}
                             </div>
                             
-                            <div className="flex items-center space-x-2">
-                              <div className={`px-2 py-1 rounded-lg border text-xs font-semibold ${getScoreColor(calculateLeadScore(customer))}`}>
-                                {calculateLeadScore(customer)}
-                              </div>
-
-                              </div>
-
-                              
-                              <select
-                                value={customer.status}
-                                onChange={(e) => {
-                                  e.stopPropagation()
-                                  handleStatusChange(customer.id, e.target.value)
-                                }}
-                                className={`status-badge border text-xs ${getStatusColor(customer.status)}`}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <option value="lead">Lead</option>
-                                <option value="prospect">Prospect</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                              </select>
-                              
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setScoringCustomerId(customer.id)
-                                  setShowScoring(true)
-                                }}
-                                className="p-1 rounded bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors text-xs"
-                                title="Update lead scoring"
-                              >
-                                🎯
-                              </button>
-                            </div>
+                            <select
+                              value={customer.status}
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                handleStatusChange(customer.id, e.target.value)
+                              }}
+                              className={`status-badge border text-xs ${getStatusColor(customer.status)}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <option value="lead">Lead</option>
+                              <option value="prospect">Prospect</option>
+                              <option value="active">Active</option>
+                              <option value="inactive">Inactive</option>
+                            </select>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setScoringCustomerId(customer.id)
+                                setShowScoring(true)
+                              }}
+                              className="p-1 rounded bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors text-xs"
+                              title="Update lead scoring"
+                            >
+                              🎯
+                            </button>
                           </div>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-3">
-                            <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
-                              <ApperIcon name="Mail" className="w-4 h-4" />
-                              <span className="truncate">{customer.email}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
-                              <ApperIcon name="Calendar" className="w-4 h-4" />
-                              <span>Last: {format(customer.lastContact, 'MMM dd')}</span>
-                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-3">
+                          <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
+                            <ApperIcon name="Mail" className="w-4 h-4" />
+                            <span className="truncate">{customer.email}</span>
                           </div>
-                          
-                          {/* Lead Score Details */}
-                          <div className="mb-3 p-2 bg-surface-50 dark:bg-surface-700 rounded-lg">
-                            <div className="flex items-center justify-between text-xs mb-1">
-                              <span className="text-surface-600 dark:text-surface-400">Lead Temperature:</span>
-                              <span className={`font-semibold ${getScoreColor(calculateLeadScore(customer))}`}>
-                                {getLeadTemperature(calculateLeadScore(customer)).toUpperCase()}
-                              </span>
-                            </div>
-                            <div className="w-full bg-surface-200 dark:bg-surface-600 rounded-full h-1.5">
-                              <div 
-                                className={`h-1.5 rounded-full transition-all duration-500 ${
-                                  calculateLeadScore(customer) >= 80 ? 'bg-red-500' :
-                                  calculateLeadScore(customer) >= 60 ? 'bg-orange-500' :
-                                  calculateLeadScore(customer) >= 40 ? 'bg-yellow-500' : 'bg-blue-500'
-                                }`}
-                                style={{ width: `${calculateLeadScore(customer)}%` }}
-                              />
-                            </div>
+                          <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
+                            <ApperIcon name="Calendar" className="w-4 h-4" />
+                            <span>Last: {format(customer.lastContact, 'MMM dd')}</span>
                           </div>
-                        </motion.div>
+                        </div>
+                        
+                        <div className="mb-3 p-2 bg-surface-50 dark:bg-surface-700 rounded-lg">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="text-surface-600 dark:text-surface-400">Lead Temperature:</span>
+                            <span className={`font-semibold ${getScoreColor(calculateLeadScore(customer))}`}>
+                              {getLeadTemperature(calculateLeadScore(customer)).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="w-full bg-surface-200 dark:bg-surface-600 rounded-full h-1.5">
+                            <div 
+                              className={`h-1.5 rounded-full transition-all duration-500 ${
+                                calculateLeadScore(customer) >= 80 ? 'bg-red-500' :
+                                calculateLeadScore(customer) >= 60 ? 'bg-orange-500' :
+                                calculateLeadScore(customer) >= 40 ? 'bg-yellow-500' : 'bg-blue-500'
+                              }`}
+                              style={{ width: `${calculateLeadScore(customer)}%` }}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
 
-
-                    ))}
                   </AnimatePresence>
                   
                   {filteredCustomers.length === 0 && (
