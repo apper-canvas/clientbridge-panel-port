@@ -270,8 +270,6 @@ const MainFeature = () => {
 
 
 
-  const handleSubmit = (e) => {
-  const handleSubmit = (e) => {
     e.preventDefault()
     
     if (!formData.name || !formData.email || !formData.company) {
@@ -585,6 +583,8 @@ const MainFeature = () => {
                             />
                           </div>
                         </div>
+                        </div>
+
 
                     ))}
                   </AnimatePresence>
@@ -936,6 +936,9 @@ const MainFeature = () => {
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
                     </select>
+                  </div>
+                  
+
                   <div>
                     <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                       Company Size
