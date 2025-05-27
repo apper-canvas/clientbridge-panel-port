@@ -315,8 +315,9 @@ const MainFeature = () => {
     
     if (!formData.name || !formData.email || !formData.company) {
       toast.error('Please fill in all required fields')
-    const newCustomer = {
-      id: Date.now().toString(),
+      return
+    }
+    
     const newCustomer = {
       id: Date.now().toString(),
       ...formData,
@@ -326,6 +327,7 @@ const MainFeature = () => {
       tasks: [],
       attachments: []
     }
+
 
 
     setCustomers(prev => [newCustomer, ...prev])
@@ -562,7 +564,8 @@ const MainFeature = () => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+  }
 
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-red-600 bg-red-50 border-red-200' // Hot
