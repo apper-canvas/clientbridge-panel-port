@@ -1102,9 +1102,10 @@ const MainFeature = () => {
                         </div>
                       </div>
                     </motion.div>
-
                       </div>
-                  </div>
+
+
+                  </motion.div>
 
 
 
