@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import { motion } from 'framer-motion'
 import MainFeature from '../components/MainFeature'
 import ApperIcon from '../components/ApperIcon'
 
 const Home = () => {
   const [darkMode, setDarkMode] = useState(false)
+  const navigate = useNavigate()
+
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
@@ -73,10 +77,14 @@ const Home = () => {
               <ApperIcon name="Users" className="w-4 h-4" />
               <span className="hidden sm:inline">Customers</span>
             </button>
-            <button className="flex items-center space-x-2 px-4 py-2 text-surface-600 dark:text-surface-400 hover:text-primary hover:bg-surface-50 dark:hover:bg-surface-700 rounded-lg transition-all duration-200 whitespace-nowrap">
+            <button 
+              onClick={() => navigate('/pipeline')}
+              className="flex items-center space-x-2 px-4 py-2 text-surface-600 dark:text-surface-400 hover:text-primary hover:bg-surface-50 dark:hover:bg-surface-700 rounded-lg transition-all duration-200 whitespace-nowrap"
+            >
               <ApperIcon name="TrendingUp" className="w-4 h-4" />
               <span className="hidden sm:inline">Pipeline</span>
             </button>
+
             <button className="flex items-center space-x-2 px-4 py-2 text-surface-600 dark:text-surface-400 hover:text-primary hover:bg-surface-50 dark:hover:bg-surface-700 rounded-lg transition-all duration-200 whitespace-nowrap">
               <ApperIcon name="Calendar" className="w-4 h-4" />
               <span className="hidden sm:inline">Tasks</span>
