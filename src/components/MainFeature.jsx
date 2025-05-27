@@ -403,7 +403,6 @@ const MainFeature = () => {
     toast.success(`${customerToDelete?.name} has been deleted successfully`)
   }
 
-  }
 
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-red-600 bg-red-50 border-red-200' // Hot
@@ -637,7 +636,7 @@ const MainFeature = () => {
                               className="p-1 rounded bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors text-xs"
                               title="Update lead scoring"
                             >
-                              🎯
+                            </button>
                             
                             <button
                               onClick={(e) => {
@@ -661,8 +660,6 @@ const MainFeature = () => {
                               🗑️
                             </button>
 
-                            </button>
-                          </div>
                         </div>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-3">
@@ -1619,176 +1616,3 @@ const MainFeature = () => {
 
 export default MainFeature
 
-
-      {/* Lead Scoring Modal */}
-      <AnimatePresence>
-        {showScoring && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-            onClick={() => setShowScoring(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-white dark:bg-surface-800 rounded-2xl shadow-card max-w-md w-full max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-surface-900 dark:text-surface-100">
-                    🎯 Update Lead Scoring
-                  </h3>
-                  <button
-                    onClick={() => setShowScoring(false)}
-                    className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-700 transition-colors duration-200"
-                  >
-                    <ApperIcon name="X" className="w-5 h-5 text-surface-500" />
-                  </button>
-                </div>
-                
-                {scoringCustomerId && (() => {
-                  const customer = customers.find(c => c.id === scoringCustomerId)
-                  if (!customer) return null
-                  
-                  const currentScore = calculateLeadScore(customer)
-                  const temperature = getLeadTemperature(currentScore)
-                  
-                  return (
-                    <form 
-                      onSubmit={(e) => {
-                        e.preventDefault()
-                        const formData = new FormData(e.target)
-                        const scoreData = {
-                          companySize: formData.get('companySize'),
-                          budget: formData.get('budget'),
-                          timeline: formData.get('timeline'),
-                          industry: formData.get('industry')
-                        }
-                        handleScoreUpdate(scoringCustomerId, scoreData)
-                      }} 
-                      className="space-y-4"
-                    >
-                      <div className="text-center mb-6">
-                        <h4 className="font-semibold text-surface-900 dark:text-surface-100 mb-2">
-                          {customer.name}
-                        </h4>
-                        <div className="flex items-center justify-center space-x-4">
-                          <div className={`px-3 py-1 rounded-lg border ${getScoreColor(currentScore)}`}>
-                            Score: {currentScore}/100
-                          </div>
-                          <div className="text-lg">
-                            {getTemperatureIcon(currentScore)} {temperature.toUpperCase()}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                          Company Size
-                        </label>
-                        <select
-                          name="companySize"
-                          defaultValue={customer.companySize || 'small'}
-                          className="input-field"
-                        >
-                          <option value="startup">Startup (1-10) - 10pts</option>
-                          <option value="small">Small (11-50) - 15pts</option>
-                          <option value="medium">Medium (51-200) - 20pts</option>
-                          <option value="large">Large (201-1000) - 25pts</option>
-                          <option value="enterprise">Enterprise (1000+) - 25pts</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                          Budget Range
-                        </label>
-                        <select
-                          name="budget"
-                          defaultValue={customer.budget || 'unknown'}
-                          className="input-field"
-                        >
-                          <option value="unknown">Unknown - 10pts</option>
-                          <option value="low">Low ($1K-$10K) - 5pts</option>
-                          <option value="medium">Medium ($10K-$50K) - 15pts</option>
-                          <option value="high">High ($50K+) - 25pts</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                          Timeline
-                        </label>
-                        <select
-                          name="timeline"
-                          defaultValue={customer.timeline || 'long'}
-                          className="input-field"
-                        >
-                          <option value="immediate">Immediate - 20pts</option>
-                          <option value="short">Short (1-3 months) - 15pts</option>
-                          <option value="medium">Medium (3-6 months) - 10pts</option>
-                          <option value="long">Long (6+ months) - 5pts</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                          Industry Fit
-                        </label>
-                        <select
-                          name="industry"
-                          defaultValue={customer.industry || 'technology'}
-                          className="input-field"
-                        >
-                          <option value="technology">Technology - 15pts</option>
-                          <option value="healthcare">Healthcare - 12pts</option>
-                          <option value="finance">Finance - 10pts</option>
-                          <option value="manufacturing">Manufacturing - 8pts</option>
-                          <option value="retail">Retail - 6pts</option>
-                          <option value="other">Other - 3pts</option>
-                        </select>
-                      </div>
-                      
-                      <div className="bg-surface-50 dark:bg-surface-700 p-3 rounded-lg">
-                        <h5 className="font-medium text-surface-900 dark:text-surface-100 mb-2">Automatic Scoring Factors:</h5>
-                        <div className="text-sm text-surface-600 dark:text-surface-400 space-y-1">
-                          <div>• Recent engagement: +15pts (last 24h), +10pts (last week), +5pts (last month)</div>
-                          <div>• Deal value: +10pts ($50K+), +7pts ($20K+), +4pts ($5K+)</div>
-                          <div>• Workflow actions will be triggered automatically based on final score</div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex space-x-3 pt-4">
-                        <button
-                          type="button"
-                          onClick={() => setShowScoring(false)}
-                          className="btn-secondary flex-1"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="btn-primary flex-1"
-                        >
-                          Update Score
-                        </button>
-                      </div>
-                    </form>
-                  )
-                })()}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-    </div>
-  )
-}
-
-export default MainFeature
