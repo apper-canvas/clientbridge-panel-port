@@ -661,7 +661,13 @@ const MainFeature = () => {
                               className="p-1 rounded bg-red-100 text-red-600 hover:bg-red-200 transition-colors text-xs"
                               title="Delete customer"
                             >
+                              🗑️
                             </button>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-3 space-y-2">
+
                           <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
                             <ApperIcon name="Mail" className="w-4 h-4" />
                             <span className="truncate">{customer.email}</span>
