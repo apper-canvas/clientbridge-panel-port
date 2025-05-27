@@ -564,8 +564,10 @@ const MainFeature = () => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
   }
+
 
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-red-600 bg-red-50 border-red-200' // Hot
@@ -998,8 +1000,9 @@ const MainFeature = () => {
                             {selectedCustomer.notes}
                           </p>
                         </div>
-                      
-                      {/* Attachments */}
+                        </div>
+                      )}
+
                       {selectedCustomer.attachments && selectedCustomer.attachments.length > 0 && (
                         <div className="space-y-3">
                           <h5 className="font-semibold text-surface-900 dark:text-surface-100">Attachments</h5>
