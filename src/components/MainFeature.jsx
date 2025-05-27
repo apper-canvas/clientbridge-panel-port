@@ -661,7 +661,6 @@ const MainFeature = () => {
                               className="p-1 rounded bg-red-100 text-red-600 hover:bg-red-200 transition-colors text-xs"
                               title="Delete customer"
                             >
-                              🗑️
                             </button>
                           <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
                             <ApperIcon name="Mail" className="w-4 h-4" />
@@ -690,7 +689,6 @@ const MainFeature = () => {
                               style={{ width: `${calculateLeadScore(customer)}%` }}
                             />
                           </div>
-                        </div>
                         </div>
                       </motion.div>
                     ))}
