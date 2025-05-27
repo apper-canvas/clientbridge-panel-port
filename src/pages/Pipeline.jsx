@@ -39,6 +39,8 @@ const Pipeline = () => {
   const [uploadingFile, setUploadingFile] = useState(false)
 
 
+  useEffect(() => {
+
   // Sample data initialization
     const sampleDeals = [
       {
@@ -126,6 +128,7 @@ const Pipeline = () => {
     ]
     setDeals(sampleDeals)
   }, [])
+
 
 
   // Filter deals based on search and stage
@@ -687,6 +690,7 @@ const Pipeline = () => {
                     className="input-field h-20 resize-none"
                     placeholder="Additional notes..."
                   />
+                </div>
 
                 <div>
                   <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
