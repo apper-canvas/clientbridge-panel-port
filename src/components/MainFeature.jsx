@@ -639,7 +639,6 @@ const MainFeature = () => {
                               🎯
                             </button>
 
-                            </button>
                             
                             <button
                               onClick={(e) => {
