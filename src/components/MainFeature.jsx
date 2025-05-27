@@ -661,9 +661,6 @@ const MainFeature = () => {
                             >
                               🗑️
                             </button>
-
-                        </div>
-                        
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm mb-3">
                           <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
                             <ApperIcon name="Mail" className="w-4 h-4" />
