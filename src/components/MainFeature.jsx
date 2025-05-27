@@ -523,10 +523,10 @@ const MainFeature = () => {
                             </div>
                             
                             <div className="flex items-center space-x-2">
-                              {/* Lead Score Display */}
                               <div className={`px-2 py-1 rounded-lg border text-xs font-semibold ${getScoreColor(calculateLeadScore(customer))}`}>
                                 {calculateLeadScore(customer)}
                               </div>
+
                               
                               <select
                                 value={customer.status}
