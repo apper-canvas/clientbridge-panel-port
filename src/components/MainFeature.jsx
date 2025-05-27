@@ -1000,8 +1000,9 @@ const MainFeature = () => {
                             {selectedCustomer.notes}
                           </p>
                         </div>
-                        </div>
                       )}
+
+                      {/* Attachments */}
 
                       {selectedCustomer.attachments && selectedCustomer.attachments.length > 0 && (
                         <div className="space-y-3">
@@ -1101,8 +1102,9 @@ const MainFeature = () => {
                           </div>
                         </div>
                       </div>
+                      </div>
 
-                      )}
+
                     </div>
                   </motion.div>
                 ) : (
