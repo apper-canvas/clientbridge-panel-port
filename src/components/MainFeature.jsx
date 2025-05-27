@@ -696,7 +696,6 @@ const MainFeature = () => {
                             />
                           </div>
                         </div>
-                    ))}
                   </AnimatePresence>
                   
                   {filteredCustomers.length === 0 && (
