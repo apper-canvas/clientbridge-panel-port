@@ -696,7 +696,11 @@ const MainFeature = () => {
                             />
                           </div>
                         </div>
-                  
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
                   {filteredCustomers.length === 0 && (
                     <div className="text-center py-12">
                       <ApperIcon name="Users" className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto mb-4" />
