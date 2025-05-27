@@ -527,6 +527,8 @@ const MainFeature = () => {
                                 {calculateLeadScore(customer)}
                               </div>
 
+                              </div>
+
                               
                               <select
                                 value={customer.status}
