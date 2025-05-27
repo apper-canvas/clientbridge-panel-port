@@ -637,6 +637,7 @@ const MainFeature = () => {
                               title="Update lead scoring"
                             >
                               🎯
+                            </button>
 
                             </button>
                             
