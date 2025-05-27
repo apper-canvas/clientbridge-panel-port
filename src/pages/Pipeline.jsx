@@ -736,9 +736,6 @@ const Pipeline = () => {
                       </p>
                     </div>
                   </div>
-                </form>
-
-                </div>
 
 
                 <div className="flex space-x-3 pt-4">
@@ -753,6 +750,8 @@ const Pipeline = () => {
                     Add Deal
                   </button>
                 </div>
+              </form>
+
               </form>
             </div>
           </motion.div>
@@ -886,6 +885,8 @@ const Pipeline = () => {
                     placeholder="Additional notes..."
                   />
 
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
                     Attachments
@@ -986,9 +987,22 @@ const Pipeline = () => {
                       )}
                     </div>
                   </div>
-                </form>
-
                 </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="btn-secondary flex-1"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary flex-1">
+                    Update Deal
+                  </button>
+                </div>
+              </form>
+
 
 
                 <div className="flex space-x-3 pt-4">
