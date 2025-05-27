@@ -1101,7 +1101,11 @@ const MainFeature = () => {
                           </div>
                         </div>
                       </div>
+                    </motion.div>
+
                       </div>
+                  </div>
+
 
 
                 ) : (
