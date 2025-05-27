@@ -28,10 +28,17 @@ const Pipeline = () => {
     contact: '',
     email: '',
     phone: '',
+    attachments: []
+
     notes: ''
   })
 
+  const [dragOver, setDragOver] = useState(false)
+  const [uploadingFile, setUploadingFile] = useState(false)
+
+
   // Sample data initialization
+  useEffect(() => {
   useEffect(() => {
     const sampleDeals = [
       {
@@ -45,7 +52,25 @@ const Pipeline = () => {
         phone: '+1 (555) 123-4567',
         notes: 'Large enterprise deal, decision by end of quarter',
         createdAt: new Date('2024-01-15'),
-        updatedAt: new Date('2024-01-20')
+        updatedAt: new Date('2024-01-20'),
+        attachments: [
+          {
+            id: 'att1',
+            name: 'proposal-v2.pdf',
+            type: 'application/pdf',
+            size: 2100000,
+            uploadedAt: new Date('2024-01-20'),
+            url: '#'
+          },
+          {
+            id: 'att2',
+            name: 'requirements.docx',
+            type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            size: 456000,
+            uploadedAt: new Date('2024-01-18'),
+            url: '#'
+          }
+        ]
       },
       {
         id: 2,
@@ -58,7 +83,17 @@ const Pipeline = () => {
         phone: '+1 (555) 987-6543',
         notes: 'Needs custom pricing, budget constraints',
         createdAt: new Date('2024-01-10'),
-        updatedAt: new Date('2024-01-22')
+        updatedAt: new Date('2024-01-22'),
+        attachments: [
+          {
+            id: 'att3',
+            name: 'architecture-diagram.png',
+            type: 'image/png',
+            size: 890000,
+            uploadedAt: new Date('2024-01-22'),
+            url: '#'
+          }
+        ]
       },
       {
         id: 3,
@@ -71,7 +106,8 @@ const Pipeline = () => {
         phone: '+1 (555) 456-7890',
         notes: 'Compliance requirements, Q2 timeline',
         createdAt: new Date('2024-01-18'),
-        updatedAt: new Date('2024-01-21')
+        updatedAt: new Date('2024-01-21'),
+        attachments: []
       },
       {
         id: 4,
@@ -84,11 +120,13 @@ const Pipeline = () => {
         phone: '+1 (555) 321-0987',
         notes: 'Initial contact, sent proposal',
         createdAt: new Date('2024-01-25'),
-        updatedAt: new Date('2024-01-25')
+        updatedAt: new Date('2024-01-25'),
+        attachments: []
       }
     ]
     setDeals(sampleDeals)
   }, [])
+
 
   // Filter deals based on search and stage
   const filteredDeals = deals.filter(deal => {
@@ -140,14 +178,20 @@ const Pipeline = () => {
     }
 
     const deal = {
+      attachments: [],
+
       id: deals.length + 1,
       ...newDeal,
       value: parseFloat(newDeal.value) || 0,
       createdAt: new Date(),
       updatedAt: new Date()
+      attachments: [],
+
     }
 
     setDeals(prev => [...prev, deal])
+      attachments: [],
+
     setNewDeal({
       title: '',
       company: '',
@@ -157,6 +201,8 @@ const Pipeline = () => {
       email: '',
       phone: '',
       notes: ''
+      attachments: [],
+
     })
     setShowAddModal(false)
     toast.success('Deal added successfully')
@@ -198,6 +244,8 @@ const Pipeline = () => {
       contact: '',
       email: '',
       phone: '',
+      attachments: [],
+
       notes: ''
     })
     toast.success('Deal updated successfully')
@@ -209,6 +257,114 @@ const Pipeline = () => {
       setDeals(prev => prev.filter(deal => deal.id !== dealId))
       toast.success('Deal deleted successfully')
     }
+
+  // File upload handlers for deals
+  const handleFileUpload = async (dealId, files) => {
+    setUploadingFile(true)
+    
+    try {
+      const validFiles = Array.from(files).filter(file => {
+        const validTypes = [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'text/plain',
+          'text/csv',
+          'application/vnd.ms-excel',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ]
+        
+        if (!validTypes.includes(file.type)) {
+          toast.error(`File type ${file.type} not supported`)
+          return false
+        }
+        
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          toast.error(`File ${file.name} is too large (max 10MB)`)
+          return false
+        }
+        
+        return true
+      })
+      
+      if (validFiles.length === 0) {
+        setUploadingFile(false)
+        return
+      }
+      
+      const newAttachments = validFiles.map(file => ({
+        id: `att_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        uploadedAt: new Date(),
+        url: URL.createObjectURL(file) // In real app, this would be server URL
+      }))
+      
+      setDeals(prev => prev.map(deal => 
+        deal.id === dealId 
+          ? { 
+              ...deal, 
+              attachments: [...(deal.attachments || []), ...newAttachments],
+              updatedAt: new Date()
+            }
+          : deal
+      ))
+      
+      toast.success(`${newAttachments.length} file(s) uploaded successfully`)
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.error('Failed to upload files')
+    } finally {
+      setUploadingFile(false)
+    }
+  }
+  
+  const handleDeleteAttachment = (dealId, attachmentId) => {
+    if (!window.confirm('Are you sure you want to delete this attachment?')) return
+    
+    setDeals(prev => prev.map(deal => 
+      deal.id === dealId 
+        ? { 
+            ...deal, 
+            attachments: (deal.attachments || []).filter(att => att.id !== attachmentId),
+            updatedAt: new Date()
+          }
+        : deal
+    ))
+    
+    toast.success('Attachment deleted successfully')
+  }
+  
+  const handleDownloadAttachment = (attachment) => {
+    // In real app, this would download from server
+    const link = document.createElement('a')
+    link.href = attachment.url
+    link.download = attachment.name
+    link.click()
+    toast.success(`Downloaded ${attachment.name}`)
+  }
+  
+  const getFileIcon = (fileType) => {
+    if (fileType.startsWith('image/')) return '🖼️'
+    if (fileType.includes('pdf')) return '📄'
+    if (fileType.includes('word') || fileType.includes('document')) return '📝'
+    if (fileType.includes('sheet') || fileType.includes('excel')) return '📊'
+    if (fileType.includes('text')) return '📃'
+    return '📎'
+  }
+  
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
   }
 
   // Calculate stage totals
@@ -381,6 +537,26 @@ const Pipeline = () => {
                         {deal.notes}
                       </p>
                     )}
+                    
+                    {deal.attachments && deal.attachments.length > 0 && (
+                      <div className="mt-2">
+                        <div className="flex items-center space-x-1 text-xs text-surface-500 mb-1">
+                          <ApperIcon name="Paperclip" className="w-3 h-3" />
+                          <span>{deal.attachments.length} file(s)</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {deal.attachments.slice(0, 2).map(attachment => (
+                            <span key={attachment.id} className="text-xs bg-surface-100 dark:bg-surface-600 px-1 py-0.5 rounded">
+                              {getFileIcon(attachment.type)} {attachment.name.length > 15 ? attachment.name.substring(0, 15) + '...' : attachment.name}
+                            </span>
+                          ))}
+                          {deal.attachments.length > 2 && (
+                            <span className="text-xs text-surface-500">+{deal.attachments.length - 2} more</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                   </motion.div>
                 ))}
               </div>
@@ -515,6 +691,53 @@ const Pipeline = () => {
                     className="input-field h-20 resize-none"
                     placeholder="Additional notes..."
                   />
+
+                <div>
+                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                    Attachments
+                  </label>
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+                      dragOver 
+                        ? 'border-primary bg-primary bg-opacity-5' 
+                        : 'border-surface-300 dark:border-surface-600 hover:border-primary'
+                    }`}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      setDragOver(true)
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault()
+                      setDragOver(false)
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      setDragOver(false)
+                      const files = e.dataTransfer.files
+                      if (files.length > 0) {
+                        toast.info('Files will be attached after deal is created')
+                      }
+                    }}
+                  >
+                    <div className="flex flex-col items-center space-y-2">
+                      <ApperIcon name="Upload" className="w-6 h-6 text-surface-400" />
+                      <div className="text-sm text-surface-600 dark:text-surface-400">
+                        <span className="font-medium text-primary cursor-pointer hover:underline"
+                          onClick={() => {
+                            toast.info('Files can be added after deal is created')
+                          }}
+                        >
+                          Click to upload
+                        </span>
+                        <span> or drag and drop</span>
+                      </div>
+                      <p className="text-xs text-surface-500 dark:text-surface-400">
+                        Files can be added after creation
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 </div>
 
                 <div className="flex space-x-3 pt-4">
@@ -661,6 +884,109 @@ const Pipeline = () => {
                     className="input-field h-20 resize-none"
                     placeholder="Additional notes..."
                   />
+
+                <div>
+                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                    Attachments
+                  </label>
+                  
+                  {selectedDeal && selectedDeal.attachments && selectedDeal.attachments.length > 0 && (
+                    <div className="mb-4 space-y-2">
+                      <div className="text-sm text-surface-600 dark:text-surface-400 mb-2">Current attachments:</div>
+                      {selectedDeal.attachments.map((attachment) => (
+                        <div key={attachment.id} className="flex items-center justify-between p-3 bg-surface-50 dark:bg-surface-700 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-lg">{getFileIcon(attachment.type)}</span>
+                            <div>
+                              <div className="font-medium text-surface-900 dark:text-surface-100 text-sm">
+                                {attachment.name}
+                              </div>
+                              <div className="text-xs text-surface-600 dark:text-surface-400">
+                                {formatFileSize(attachment.size)} • {format(attachment.uploadedAt, 'MMM dd, yyyy')}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadAttachment(attachment)}
+                              className="p-1 rounded hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
+                              title="Download"
+                            >
+                              <ApperIcon name="Download" className="w-4 h-4 text-surface-500" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAttachment(selectedDeal.id, attachment.id)}
+                              className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
+                              title="Delete"
+                            >
+                              <ApperIcon name="Trash2" className="w-4 h-4 text-red-500" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+                      dragOver 
+                        ? 'border-primary bg-primary bg-opacity-5' 
+                        : 'border-surface-300 dark:border-surface-600 hover:border-primary'
+                    }`}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      setDragOver(true)
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault()
+                      setDragOver(false)
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      setDragOver(false)
+                      const files = e.dataTransfer.files
+                      if (files.length > 0 && selectedDeal) {
+                        handleFileUpload(selectedDeal.id, files)
+                      }
+                    }}
+                  >
+                    <div className="flex flex-col items-center space-y-2">
+                      <ApperIcon name="Upload" className="w-6 h-6 text-surface-400" />
+                      <div className="text-sm text-surface-600 dark:text-surface-400">
+                        <span className="font-medium text-primary cursor-pointer hover:underline"
+                          onClick={() => {
+                            if (!selectedDeal) return
+                            const input = document.createElement('input')
+                            input.type = 'file'
+                            input.multiple = true
+                            input.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.txt,.csv,.xls,.xlsx'
+                            input.onchange = (e) => {
+                              if (e.target.files.length > 0) {
+                                handleFileUpload(selectedDeal.id, e.target.files)
+                              }
+                            }
+                            input.click()
+                          }}
+                        >
+                          Click to upload
+                        </span>
+                        <span> or drag and drop</span>
+                      </div>
+                      <p className="text-xs text-surface-500 dark:text-surface-400">
+                        PDF, DOC, Images, Excel, TXT (max 10MB each)
+                      </p>
+                      {uploadingFile && (
+                        <div className="flex items-center space-x-2 text-primary">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                          <span className="text-sm">Uploading...</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 </div>
 
                 <div className="flex space-x-3 pt-4">

@@ -17,6 +17,9 @@ const MainFeature = () => {
   const [filterStatus, setFilterStatus] = useState('all')
   const [view, setView] = useState('list') // 'list', 'pipeline', 'analytics'
   
+  const [dragOver, setDragOver] = useState(false)
+  const [uploadingFile, setUploadingFile] = useState(false)
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,6 +31,8 @@ const MainFeature = () => {
     budget: 'unknown',
     timeline: 'long',
     industry: 'technology'
+    attachments: []
+
   })
   
   // Lead scoring state
@@ -175,6 +180,7 @@ const MainFeature = () => {
 
   // Sample data initialization with scoring data
   useEffect(() => {
+  useEffect(() => {
     const sampleCustomers = [
       {
         id: '1',
@@ -190,6 +196,24 @@ const MainFeature = () => {
         budget: 'high',
         timeline: 'short',
         industry: 'technology',
+        attachments: [
+          {
+            id: 'att1',
+            name: 'meeting-notes-jan20.pdf',
+            type: 'application/pdf',
+            size: 245000,
+            uploadedAt: new Date('2024-01-20'),
+            url: '#'
+          },
+          {
+            id: 'att2',
+            name: 'company-logo.png',
+            type: 'image/png',
+            size: 89000,
+            uploadedAt: new Date('2024-01-15'),
+            url: '#'
+          }
+        ],
         deals: [
           { id: 'd1', title: 'Enterprise License', value: 25000, stage: 'proposal', probability: 75 }
         ],
@@ -211,6 +235,7 @@ const MainFeature = () => {
         budget: 'medium',
         timeline: 'medium',
         industry: 'technology',
+        attachments: [],
         deals: [],
         tasks: [
           { id: 't2', title: 'Initial qualification call', dueDate: addDays(new Date(), 1), priority: 'medium', completed: false }
@@ -230,12 +255,25 @@ const MainFeature = () => {
         budget: 'low',
         timeline: 'immediate',
         industry: 'technology',
+        attachments: [
+          {
+            id: 'att3',
+            name: 'startup-requirements.docx',
+            type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            size: 156000,
+            uploadedAt: new Date('2024-01-22'),
+            url: '#'
+          }
+        ],
         deals: [
           { id: 'd2', title: 'Startup Package', value: 5000, stage: 'negotiation', probability: 60 }
         ],
         tasks: []
       }
     ]
+    setCustomers(sampleCustomers)
+  }, [])
+
     setCustomers(sampleCustomers)
   }, [])
 
@@ -283,6 +321,8 @@ const MainFeature = () => {
       return
     }
 
+      attachments: []
+
     const newCustomer = {
       id: Date.now().toString(),
       ...formData,
@@ -290,6 +330,8 @@ const MainFeature = () => {
       lastContact: new Date(),
       deals: [],
       tasks: []
+      attachments: [],
+
     }
 
     setCustomers(prev => [newCustomer, ...prev])
@@ -401,6 +443,135 @@ const MainFeature = () => {
     setDeletingCustomerId(null)
     
     toast.success(`${customerToDelete?.name} has been deleted successfully`)
+
+  // File upload handlers
+  const handleFileUpload = async (customerId, files) => {
+    setUploadingFile(true)
+    
+    try {
+      const validFiles = Array.from(files).filter(file => {
+        const validTypes = [
+          'application/pdf',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'text/plain',
+          'text/csv'
+        ]
+        
+        if (!validTypes.includes(file.type)) {
+          toast.error(`File type ${file.type} not supported`)
+          return false
+        }
+        
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          toast.error(`File ${file.name} is too large (max 10MB)`)
+          return false
+        }
+        
+        return true
+      })
+      
+      if (validFiles.length === 0) {
+        setUploadingFile(false)
+        return
+      }
+      
+      const newAttachments = validFiles.map(file => ({
+        id: `att_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        uploadedAt: new Date(),
+        url: URL.createObjectURL(file) // In real app, this would be server URL
+      }))
+      
+      setCustomers(prev => prev.map(customer => 
+        customer.id === customerId 
+          ? { 
+              ...customer, 
+              attachments: [...customer.attachments, ...newAttachments],
+              lastContact: new Date()
+            }
+          : customer
+      ))
+      
+      // Update selected customer if it matches
+      setSelectedCustomer(prev => {
+        if (prev && prev.id === customerId) {
+          return {
+            ...prev,
+            attachments: [...prev.attachments, ...newAttachments],
+            lastContact: new Date()
+          }
+        }
+        return prev
+      })
+      
+      toast.success(`${newAttachments.length} file(s) uploaded successfully`)
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.error('Failed to upload files')
+    } finally {
+      setUploadingFile(false)
+    }
+  }
+  
+  const handleDeleteAttachment = (customerId, attachmentId) => {
+    if (!window.confirm('Are you sure you want to delete this attachment?')) return
+    
+    setCustomers(prev => prev.map(customer => 
+      customer.id === customerId 
+        ? { 
+            ...customer, 
+            attachments: customer.attachments.filter(att => att.id !== attachmentId),
+            lastContact: new Date()
+          }
+        : customer
+    ))
+    
+    // Update selected customer if it matches
+    setSelectedCustomer(prev => {
+      if (prev && prev.id === customerId) {
+        return {
+          ...prev,
+          attachments: prev.attachments.filter(att => att.id !== attachmentId),
+          lastContact: new Date()
+        }
+      }
+      return prev
+    })
+    
+    toast.success('Attachment deleted successfully')
+  }
+  
+  const handleDownloadAttachment = (attachment) => {
+    // In real app, this would download from server
+    const link = document.createElement('a')
+    link.href = attachment.url
+    link.download = attachment.name
+    link.click()
+    toast.success(`Downloaded ${attachment.name}`)
+  }
+  
+  const getFileIcon = (fileType) => {
+    if (fileType.startsWith('image/')) return '🖼️'
+    if (fileType.includes('pdf')) return '📄'
+    if (fileType.includes('word') || fileType.includes('document')) return '📝'
+    if (fileType.includes('text')) return '📃'
+    return '📎'
+  }
+  
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
   }
 
 
@@ -835,6 +1006,107 @@ const MainFeature = () => {
                             {selectedCustomer.notes}
                           </p>
                         </div>
+                      
+                      {/* Attachments */}
+                      {selectedCustomer.attachments && selectedCustomer.attachments.length > 0 && (
+                        <div className="space-y-3">
+                          <h5 className="font-semibold text-surface-900 dark:text-surface-100">Attachments</h5>
+                          <div className="space-y-2">
+                            {selectedCustomer.attachments.map((attachment) => (
+                              <div key={attachment.id} className="flex items-center justify-between p-3 bg-surface-50 dark:bg-surface-700 rounded-lg">
+                                <div className="flex items-center space-x-3">
+                                  <span className="text-lg">{getFileIcon(attachment.type)}</span>
+                                  <div>
+                                    <h6 className="font-medium text-surface-900 dark:text-surface-100 text-sm">
+                                      {attachment.name}
+                                    </h6>
+                                    <p className="text-xs text-surface-600 dark:text-surface-400">
+                                      {formatFileSize(attachment.size)} • {format(attachment.uploadedAt, 'MMM dd, yyyy')}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => handleDownloadAttachment(attachment)}
+                                    className="p-1 rounded hover:bg-surface-200 dark:hover:bg-surface-600 transition-colors"
+                                    title="Download"
+                                  >
+                                    <ApperIcon name="Download" className="w-4 h-4 text-surface-500" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteAttachment(selectedCustomer.id, attachment.id)}
+                                    className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
+                                    title="Delete"
+                                  >
+                                    <ApperIcon name="Trash2" className="w-4 h-4 text-red-500" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* File Upload Area */}
+                      <div className="space-y-3">
+                        <h5 className="font-semibold text-surface-900 dark:text-surface-100">Add Attachments</h5>
+                        <div 
+                          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+                            dragOver 
+                              ? 'border-primary bg-primary bg-opacity-5' 
+                              : 'border-surface-300 dark:border-surface-600 hover:border-primary'
+                          }`}
+                          onDragOver={(e) => {
+                            e.preventDefault()
+                            setDragOver(true)
+                          }}
+                          onDragLeave={(e) => {
+                            e.preventDefault()
+                            setDragOver(false)
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            setDragOver(false)
+                            const files = e.dataTransfer.files
+                            if (files.length > 0) {
+                              handleFileUpload(selectedCustomer.id, files)
+                            }
+                          }}
+                        >
+                          <div className="flex flex-col items-center space-y-2">
+                            <ApperIcon name="Upload" className="w-8 h-8 text-surface-400" />
+                            <div className="text-sm text-surface-600 dark:text-surface-400">
+                              <span className="font-medium text-primary cursor-pointer hover:underline"
+                                onClick={() => {
+                                  const input = document.createElement('input')
+                                  input.type = 'file'
+                                  input.multiple = true
+                                  input.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.txt,.csv'
+                                  input.onchange = (e) => {
+                                    if (e.target.files.length > 0) {
+                                      handleFileUpload(selectedCustomer.id, e.target.files)
+                                    }
+                                  }
+                                  input.click()
+                                }}
+                              >
+                                Click to upload
+                              </span>
+                              <span> or drag and drop</span>
+                            </div>
+                            <p className="text-xs text-surface-500 dark:text-surface-400">
+                              PDF, DOC, Images, TXT (max 10MB each)
+                            </p>
+                            {uploadingFile && (
+                              <div className="flex items-center space-x-2 text-primary">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                <span className="text-sm">Uploading...</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
                       )}
                     </div>
                   </motion.div>
@@ -1122,6 +1394,54 @@ const MainFeature = () => {
                       <option value="other">Other</option>
                     </select>
                   </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Attachments
+                    </label>
+                    <div 
+                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+                        dragOver 
+                          ? 'border-primary bg-primary bg-opacity-5' 
+                          : 'border-surface-300 dark:border-surface-600 hover:border-primary'
+                      }`}
+                      onDragOver={(e) => {
+                        e.preventDefault()
+                        setDragOver(true)
+                      }}
+                      onDragLeave={(e) => {
+                        e.preventDefault()
+                        setDragOver(false)
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        setDragOver(false)
+                        // For new customers, we'll store files temporarily
+                        const files = e.dataTransfer.files
+                        if (files.length > 0) {
+                          toast.info('Files will be attached after customer is created')
+                        }
+                      }}
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <ApperIcon name="Upload" className="w-6 h-6 text-surface-400" />
+                        <div className="text-sm text-surface-600 dark:text-surface-400">
+                          <span className="font-medium text-primary cursor-pointer hover:underline"
+                            onClick={() => {
+                              toast.info('Files can be added after customer is created')
+                            }}
+                          >
+                            Click to upload
+                          </span>
+                          <span> or drag and drop</span>
+                        </div>
+                        <p className="text-xs text-surface-500 dark:text-surface-400">
+                          Files can be added after creation
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
 
                   
                   <div className="flex space-x-3 pt-4">
@@ -1337,6 +1657,93 @@ const MainFeature = () => {
                       placeholder="Add notes about this customer..."
                       rows={3}
                     />
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Attachments
+                    </label>
+                    
+                    {editingCustomer && editingCustomer.attachments && editingCustomer.attachments.length > 0 && (
+                      <div className="mb-4 space-y-2">
+                        <div className="text-sm text-surface-600 dark:text-surface-400 mb-2">Current attachments:</div>
+                        {editingCustomer.attachments.map((attachment) => (
+                          <div key={attachment.id} className="flex items-center justify-between p-2 bg-surface-50 dark:bg-surface-700 rounded">
+                            <div className="flex items-center space-x-2">
+                              <span>{getFileIcon(attachment.type)}</span>
+                              <span className="text-sm">{attachment.name}</span>
+                              <span className="text-xs text-surface-500">({formatFileSize(attachment.size)})</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAttachment(editingCustomer.id, attachment.id)}
+                              className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
+                              title="Delete attachment"
+                            >
+                              <ApperIcon name="Trash2" className="w-3 h-3 text-red-500" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div 
+                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+                        dragOver 
+                          ? 'border-primary bg-primary bg-opacity-5' 
+                          : 'border-surface-300 dark:border-surface-600 hover:border-primary'
+                      }`}
+                      onDragOver={(e) => {
+                        e.preventDefault()
+                        setDragOver(true)
+                      }}
+                      onDragLeave={(e) => {
+                        e.preventDefault()
+                        setDragOver(false)
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        setDragOver(false)
+                        const files = e.dataTransfer.files
+                        if (files.length > 0 && editingCustomer) {
+                          handleFileUpload(editingCustomer.id, files)
+                        }
+                      }}
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <ApperIcon name="Upload" className="w-6 h-6 text-surface-400" />
+                        <div className="text-sm text-surface-600 dark:text-surface-400">
+                          <span className="font-medium text-primary cursor-pointer hover:underline"
+                            onClick={() => {
+                              if (!editingCustomer) return
+                              const input = document.createElement('input')
+                              input.type = 'file'
+                              input.multiple = true
+                              input.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.txt,.csv'
+                              input.onchange = (e) => {
+                                if (e.target.files.length > 0) {
+                                  handleFileUpload(editingCustomer.id, e.target.files)
+                                }
+                              }
+                              input.click()
+                            }}
+                          >
+                            Click to upload
+                          </span>
+                          <span> or drag and drop</span>
+                        </div>
+                        <p className="text-xs text-surface-500 dark:text-surface-400">
+                          PDF, DOC, Images, TXT (max 10MB each)
+                        </p>
+                        {uploadingFile && (
+                          <div className="flex items-center space-x-2 text-primary">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                            <span className="text-sm">Uploading...</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   </div>
                   
                   <div className="flex space-x-3 pt-4">
