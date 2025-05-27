@@ -861,7 +861,6 @@ const MainFeature = () => {
                             />
                           </div>
                         </div>
-                        </div>
 
                     ))}
                   </AnimatePresence>
@@ -1102,6 +1101,9 @@ const MainFeature = () => {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </motion.div>
+
                   </motion.div>
 
                     </motion.div>
