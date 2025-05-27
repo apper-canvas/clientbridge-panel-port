@@ -1104,10 +1104,6 @@ const MainFeature = () => {
                       </div>
 
 
-                  </motion.div>
-
-                    </div>
-                  </motion.div>
                 ) : (
                   <motion.div
                     initial={{ opacity: 0 }}
