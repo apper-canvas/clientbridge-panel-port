@@ -636,6 +636,8 @@ const MainFeature = () => {
                               className="p-1 rounded bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors text-xs"
                               title="Update lead scoring"
                             >
+                              🎯
+
                             </button>
                             
                             <button
@@ -1615,4 +1617,3 @@ const MainFeature = () => {
 }
 
 export default MainFeature
-
