@@ -690,8 +690,6 @@ const MainFeature = () => {
                             />
                           </div>
                         </div>
-
-                  
                   {filteredCustomers.length === 0 && (
                     <div className="text-center py-12">
                       <ApperIcon name="Users" className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto mb-4" />
@@ -700,6 +698,11 @@ const MainFeature = () => {
                           ? 'No customers match your search criteria' 
                           : 'No customers yet. Add your first customer to get started.'}
                       </p>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  
+
                     </div>
                   )}
                 </div>
