@@ -34,13 +34,10 @@ const MainFeature = () => {
     attachments: []
   })
 
-  
   // Lead scoring state
   const [showScoring, setShowScoring] = useState(false)
   const [scoringCustomerId, setScoringCustomerId] = useState(null)
 
-
-  // Sample data initialization
   // Lead scoring algorithm
   const calculateLeadScore = (customer) => {
     let score = 0
@@ -180,7 +177,6 @@ const MainFeature = () => {
 
   // Sample data initialization with scoring data
   useEffect(() => {
-
     const sampleCustomers = [
       {
         id: '1',
@@ -274,7 +270,6 @@ const MainFeature = () => {
     setCustomers(sampleCustomers)
   }, [])
 
-
   // Filter customers based on search and status
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -308,8 +303,6 @@ const MainFeature = () => {
     toast.success('Lead scoring updated and workflow triggered!')
   }
 
-
-
   const handleSubmit = (e) => {
     e.preventDefault()
     
@@ -327,8 +320,6 @@ const MainFeature = () => {
       tasks: [],
       attachments: []
     }
-
-
 
     setCustomers(prev => [newCustomer, ...prev])
     
@@ -351,9 +342,6 @@ const MainFeature = () => {
     setShowAddForm(false)
     toast.success('Customer added successfully with automated scoring!')
   }
-
-
-
 
   const handleStatusChange = (customerId, newStatus) => {
     setCustomers(prev => prev.map(customer => 
@@ -439,7 +427,6 @@ const MainFeature = () => {
     setDeletingCustomerId(null)
     toast.success(`${customerToDelete?.name} has been deleted successfully`)
   }
-
 
   const handleFileUpload = async (customerId, files) => {
     setUploadingFile(true)
@@ -568,7 +555,6 @@ const MainFeature = () => {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
   }
 
-
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-red-600 bg-red-50 border-red-200' // Hot
     if (score >= 60) return 'text-orange-600 bg-orange-50 border-orange-200' // Warm
@@ -583,7 +569,6 @@ const MainFeature = () => {
     if (temp === 'lukewarm') return '🌤️'
     return '❄️'
   }
-
 
   const getStatusColor = (status) => {
     const colors = {
@@ -668,7 +653,6 @@ const MainFeature = () => {
             <span>🎯</span>
             <span className="hidden sm:inline">Lead Scoring</span>
           </button>
-
           
           <button
             onClick={() => setShowAddForm(true)}
@@ -793,46 +777,44 @@ const MainFeature = () => {
                             </select>
                             
                             <div className="flex items-center space-x-2">
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setScoringCustomerId(customer.id)
-                                setShowScoring(true)
-                              }}
-                              className="p-1 rounded bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors text-xs"
-                              title="Update lead scoring"
-                            >
-                              🎯
-                            </button>
-
-                            
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleEdit(customer)
-                              }}
-                              className="p-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors text-xs"
-                              title="Edit customer"
-                            >
-                              ✏️
-                            </button>
-                            
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleDelete(customer.id)
-                              }}
-                              className="p-1 rounded bg-red-100 text-red-600 hover:bg-red-200 transition-colors text-xs"
-                              title="Delete customer"
-                            >
-                              🗑️
-                            </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setScoringCustomerId(customer.id)
+                                  setShowScoring(true)
+                                }}
+                                className="p-1 rounded bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors text-xs"
+                                title="Update lead scoring"
+                              >
+                                🎯
+                              </button>
+                              
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEdit(customer)
+                                }}
+                                className="p-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors text-xs"
+                                title="Edit customer"
+                              >
+                                ✏️
+                              </button>
+                              
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDelete(customer.id)
+                                }}
+                                className="p-1 rounded bg-red-100 text-red-600 hover:bg-red-200 transition-colors text-xs"
+                                title="Delete customer"
+                              >
+                                🗑️
+                              </button>
+                            </div>
                           </div>
                         </div>
                         
                         <div className="mb-3 space-y-2">
-
                           <div className="flex items-center space-x-2 text-surface-600 dark:text-surface-400">
                             <ApperIcon name="Mail" className="w-4 h-4" />
                             <span className="truncate">{customer.email}</span>
@@ -862,10 +844,6 @@ const MainFeature = () => {
                           </div>
                         </div>
                       </motion.div>
-
-                      </motion.div>
-
-
                     ))}
                   </AnimatePresence>
 
@@ -879,7 +857,6 @@ const MainFeature = () => {
                       </p>
                     </div>
                   )}
-
                 </div>
               </div>
             </div>
@@ -1006,7 +983,6 @@ const MainFeature = () => {
                       )}
 
                       {/* Attachments */}
-
                       {selectedCustomer.attachments && selectedCustomer.attachments.length > 0 && (
                         <div className="space-y-3">
                           <h5 className="font-semibold text-surface-900 dark:text-surface-100">Attachments</h5>
@@ -1107,9 +1083,6 @@ const MainFeature = () => {
                       </div>
                     </div>
                   </motion.div>
-
-
-
                 ) : (
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -1322,7 +1295,6 @@ const MainFeature = () => {
                       <option value="inactive">Inactive</option>
                     </select>
                   </div>
-                  
 
                   <div>
                     <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
@@ -1394,55 +1366,6 @@ const MainFeature = () => {
                       <option value="other">Other</option>
                     </select>
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                      Attachments
-                    </label>
-                    <div 
-                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-                        dragOver 
-                          ? 'border-primary bg-primary bg-opacity-5' 
-                          : 'border-surface-300 dark:border-surface-600 hover:border-primary'
-                      }`}
-                      onDragOver={(e) => {
-                        e.preventDefault()
-                        setDragOver(true)
-                      }}
-                      onDragLeave={(e) => {
-                        e.preventDefault()
-                        setDragOver(false)
-                      }}
-                      onDrop={(e) => {
-                        e.preventDefault()
-                        setDragOver(false)
-                        // For new customers, we'll store files temporarily
-                        const files = e.dataTransfer.files
-                        if (files.length > 0) {
-                          toast.info('Files will be attached after customer is created')
-                        }
-                      }}
-                    >
-                      <div className="flex flex-col items-center space-y-2">
-                        <ApperIcon name="Upload" className="w-6 h-6 text-surface-400" />
-                        <div className="text-sm text-surface-600 dark:text-surface-400">
-                          <span className="font-medium text-primary cursor-pointer hover:underline"
-                            onClick={() => {
-                              toast.info('Files can be added after customer is created')
-                            }}
-                          >
-                            Click to upload
-                          </span>
-                          <span> or drag and drop</span>
-                        </div>
-                        <p className="text-xs text-surface-500 dark:text-surface-400">
-                          Files can be added after creation
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-
                   
                   <div className="flex space-x-3 pt-4">
                     <button
@@ -1657,93 +1580,6 @@ const MainFeature = () => {
                       placeholder="Add notes about this customer..."
                       rows={3}
                     />
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                      Attachments
-                    </label>
-                    
-                    {editingCustomer && editingCustomer.attachments && editingCustomer.attachments.length > 0 && (
-                      <div className="mb-4 space-y-2">
-                        <div className="text-sm text-surface-600 dark:text-surface-400 mb-2">Current attachments:</div>
-                        {editingCustomer.attachments.map((attachment) => (
-                          <div key={attachment.id} className="flex items-center justify-between p-2 bg-surface-50 dark:bg-surface-700 rounded">
-                            <div className="flex items-center space-x-2">
-                              <span>{getFileIcon(attachment.type)}</span>
-                              <span className="text-sm">{attachment.name}</span>
-                              <span className="text-xs text-surface-500">({formatFileSize(attachment.size)})</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteAttachment(editingCustomer.id, attachment.id)}
-                              className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
-                              title="Delete attachment"
-                            >
-                              <ApperIcon name="Trash2" className="w-3 h-3 text-red-500" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    <div 
-                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-                        dragOver 
-                          ? 'border-primary bg-primary bg-opacity-5' 
-                          : 'border-surface-300 dark:border-surface-600 hover:border-primary'
-                      }`}
-                      onDragOver={(e) => {
-                        e.preventDefault()
-                        setDragOver(true)
-                      }}
-                      onDragLeave={(e) => {
-                        e.preventDefault()
-                        setDragOver(false)
-                      }}
-                      onDrop={(e) => {
-                        e.preventDefault()
-                        setDragOver(false)
-                        const files = e.dataTransfer.files
-                        if (files.length > 0 && editingCustomer) {
-                          handleFileUpload(editingCustomer.id, files)
-                        }
-                      }}
-                    >
-                      <div className="flex flex-col items-center space-y-2">
-                        <ApperIcon name="Upload" className="w-6 h-6 text-surface-400" />
-                        <div className="text-sm text-surface-600 dark:text-surface-400">
-                          <span className="font-medium text-primary cursor-pointer hover:underline"
-                            onClick={() => {
-                              if (!editingCustomer) return
-                              const input = document.createElement('input')
-                              input.type = 'file'
-                              input.multiple = true
-                              input.accept = '.pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.txt,.csv'
-                              input.onchange = (e) => {
-                                if (e.target.files.length > 0) {
-                                  handleFileUpload(editingCustomer.id, e.target.files)
-                                }
-                              }
-                              input.click()
-                            }}
-                          >
-                            Click to upload
-                          </span>
-                          <span> or drag and drop</span>
-                        </div>
-                        <p className="text-xs text-surface-500 dark:text-surface-400">
-                          PDF, DOC, Images, TXT (max 10MB each)
-                        </p>
-                        {uploadingFile && (
-                          <div className="flex items-center space-x-2 text-primary">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                            <span className="text-sm">Uploading...</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
                   </div>
                   
                   <div className="flex space-x-3 pt-4">
